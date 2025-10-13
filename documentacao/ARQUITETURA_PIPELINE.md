@@ -284,78 +284,72 @@ S3 (Raw) → AWS Glue ETL → S3 (Bronze/Silver/Gold) → Athena (Query) → Qui
 
 | Papel | Responsável | Responsabilidades |
 |-------|-------------|-------------------|
-| **Tech Lead / Arquiteto de Dados** | [Nome] | Definição da arquitetura, escolha de tecnologias, revisão técnica |
-| **Engenheiro de Dados 1** | [Nome] | Implementação do pipeline Bronze → Silver, parsing de JSON, feature engineering |
-| **Engenheiro de Dados 2** | [Nome] | Implementação Silver → Gold, otimização de queries, particionamento |
-| **Cientista de Dados** | [Nome] | EDA, modelagem, validação de features, análise de resultados |
-| **DevOps / MLOps** | [Nome] | Containerização, CI/CD, monitoramento, deployment |
+| **Engenheiro de Dados 1** | [Anthony Kevin] | Implementação da camada **Bronze**, ingestão, padronização e versionamento de dados |
+| **Engenheiro de Dados 2** | [Beatriz Vilarim] | Implementação da camada **Silver**, limpeza, enriquecimento e criação de features |
+| **Engenheiro de Dados 3** | [João Pedro] | Implementação da camada **Gold**, análise exploratória (EDA), visualizações e documentação final |
+
+---
 
 ### 4.2 Divisão de Tarefas Detalhada
 
 #### **Sprint 1: Fundação (Semanas 1-2)**
-- [ ] **Tech Lead**: Definir arquitetura medalion, criar diagrama técnico
-- [ ] **Eng. Dados 1**: Implementar camada Bronze (ingestão + padronização)
-- [ ] **Eng. Dados 2**: Configurar estrutura de diretórios e versionamento
-- [ ] **Cientista de Dados**: Análise exploratória do CSV raw
-- [ ] **DevOps**: Setup do ambiente (Colab, Git, requisitos)
+
+| Membro | Tarefas |
+|--------|----------|
+| **Eng. Dados 1** | Configurar estrutura de diretórios `/dados/raw`, `/dados/bronze`, `/dados/silver`, `/dados/gold`; implementar ingestão do CSV via Pandas; padronizar nomes de colunas e formatos |
+| **Eng. Dados 2** | Auxiliar no setup do ambiente (Google Colab/Jupyter); preparar notebook base de transformação; testar leitura de dados e tipos iniciais |
+| **Eng. Dados 3** | Criar documentação inicial (README técnico e guia de execução); realizar EDA preliminar do dataset raw (valores nulos, tipos e estatísticas básicas) |
+
+---
 
 #### **Sprint 2: Transformação (Semanas 3-4)**
-- [ ] **Eng. Dados 1**:
-  - Implementar camada Silver (limpeza, tipagem)
-  - Parsing de campos JSON (genres, companies)
-  - Tratamento de valores faltantes
-- [ ] **Eng. Dados 2**:
-  - Feature engineering (ROI, vote_density)
-  - Deduplicação e filtros de qualidade
-- [ ] **Cientista de Dados**:
-  - Definir features relevantes para modelagem
-  - Análise de correlações
-- [ ] **DevOps**: Configurar notebooks parametrizados
 
-#### **Sprint 3: Analytics (Semanas 5-6)**
-- [ ] **Eng. Dados 2**:
-  - Implementar camada Gold
-  - Criar agregações e sumarizações
-  - Exportar CSVs para consumo
-- [ ] **Cientista de Dados**:
-  - EDA completa (visualizações)
-  - Baseline de modelagem (regressão linear)
-  - Documentar insights
-- [ ] **DevOps**:
-  - Automatizar execução do pipeline
-  - Configurar exports automáticos
+| Membro | Tarefas |
+|--------|----------|
+| **Eng. Dados 1** | Finalizar camada **Bronze** (salvar em Parquet, compressão Snappy, validações básicas) |
+| **Eng. Dados 2** | Implementar camada **Silver** (limpeza, parsing de JSON, coerção de tipos, criação de `ROI`, `vote_density`, `years_since_release`) |
+| **Eng. Dados 3** | Validar qualidade dos dados na Silver; remover duplicatas; verificar consistência dos campos numéricos e de data |
+
+---
+
+#### **Sprint 3: Analytics e Consolidação (Semanas 5-6)**
+
+| Membro | Tarefas |
+|--------|----------|
+| **Eng. Dados 1** | Implementar camada **Gold** (seleção de colunas core, agregações e exportação final para CSV/Parquet) |
+| **Eng. Dados 2** | Criar amostras (`gold_sample.csv`) e estatísticas descritivas (`gold_describe.csv`); otimizar queries e desempenho de leitura |
+| **Eng. Dados 3** | Realizar análise exploratória completa (EDA com Matplotlib e Pandas); gerar visualizações e insights iniciais |
+
+---
 
 #### **Sprint 4: Documentação e Entrega (Semana 7)**
-- [ ] **Tech Lead**:
-  - Revisar código e arquitetura
-  - Preparar apresentação técnica
-- [ ] **Eng. Dados 1 & 2**:
-  - Refatoração e otimização
-  - Testes de qualidade
-- [ ] **Cientista de Dados**:
-  - Finalizar relatório de análise
-  - Documentar limitações e próximos passos
-- [ ] **DevOps**:
-  - README técnico
-  - Guia de execução
+
+| Membro | Tarefas |
+|--------|----------|
+| **Eng. Dados 1** | Revisar código e estrutura de diretórios; garantir compatibilidade e versionamento |
+| **Eng. Dados 2** | Consolidar notebooks e resultados em um relatório técnico final |
+| **Eng. Dados 3** | Organizar apresentação final (slides ou documento técnico); redigir conclusões, próximos passos e recomendações |
+
+---
 
 ### 4.3 Cerimônias Ágeis
 
 | Cerimônia | Frequência | Duração | Objetivo |
-|-----------|-----------|---------|----------|
-| **Daily Standup** | Diário | 15 min | Sincronização de progresso e bloqueios |
-| **Sprint Planning** | Início de cada sprint | 2h | Definir escopo e estimar tarefas |
-| **Code Review** | Ad-hoc | 30 min | Garantir qualidade e compartilhar conhecimento |
-| **Sprint Review** | Final de cada sprint | 1h | Demonstrar funcionalidades implementadas |
-| **Retrospectiva** | Final de cada sprint | 1h | Melhorias de processo |
+|-----------|-------------|----------|-----------|
+| **Daily Standup** | Diário | 15 min | Sincronizar andamento e identificar bloqueios |
+| **Sprint Planning** | Início de cada sprint | 1h | Definir escopo e dividir tarefas |
+| **Sprint Review** | Final de cada sprint | 45 min | Apresentar resultados implementados |
+| **Retrospectiva** | Final de cada sprint | 30 min | Ajustar processos e fluxo de trabalho |
+
+---
 
 ### 4.4 Ferramentas de Colaboração
 
 - **Código**: GitHub (branches: `main`, `dev`, `feature/*`)
-- **Tarefas**: GitHub Projects / Trello
-- **Documentação**: Markdown (versionado no Git)
-- **Comunicação**: Slack / Discord
-- **Notebooks**: Google Colab (compartilhado)
+- **Controle de Tarefas**: GitHub Projects / Trello
+- **Ambiente de Execução**: Google Colab / Jupyter Notebook
+- **Documentação**: Markdown versionado no repositório
+- **Comunicação**: Discord / WhatsApp
 
 ---
 
@@ -389,7 +383,3 @@ S3 (Raw) → AWS Glue ETL → S3 (Bronze/Silver/Gold) → Athena (Query) → Qui
 - [The Movies Dataset - Kaggle](https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset)
 
 ---
-
-**Documento gerado em:** 2025-10-06
-**Versão:** 1.0
-**Status:** Em desenvolvimento
