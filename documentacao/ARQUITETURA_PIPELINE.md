@@ -1,119 +1,26 @@
 # Arquitetura do Pipeline de Dados - Movies Dataset
 
-## 1. Diagrama do Pipeline de Dados
+> **📊 Diagrama Visual**: Para visualizar o fluxo completo do pipeline, consulte [DIAGRAMA_PIPELINE.md](./DIAGRAMA_PIPELINE.md)
 
-### Fluxo Geral do Pipeline
+---
+
+## 1. Visão Geral da Arquitetura
+
+Este projeto implementa um **pipeline de dados em batch** seguindo a **arquitetura Medallion** (Bronze → Silver → Gold) para processar e analisar o dataset "The Movies Dataset" do Kaggle.
+
+### Principais Características
+
+- **Dataset**: ~45K registros de filmes (movies_metadata.csv)
+- **Arquitetura**: Medallion (3 camadas)
+- **Formato de Armazenamento**: Parquet (colunar, comprimido)
+- **Processamento**: Python + Pandas
+- **Análises**: EDA com heatmaps de correlação + Baseline de ML
+
+### Fluxo Resumido
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                           INGESTÃO (Batch)                             │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  ┌──────────────┐      ┌──────────────┐      ┌──────────────┐          │
-│  │ Kaggle API   │      │ Google Drive │      │ Upload Manual│          │
-│  └──────┬───────┘      └──────┬───────┘      └──────┬───────┘          │
-│         │                     │                     │                  │
-│         └─────────────────────┴─────────────────────┘                  │
-│                                │                                       │
-│                                ▼                                       │
-│                    ┌───────────────────────┐                           │
-│                    │  movies_metadata.csv  │                           │
-│                    │     /dados/raw/       │                           │
-│                    └───────────┬───────────┘                           │
-└────────────────────────────────┼───────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    CAMADA BRONZE - Padronização                         │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  Transformações:                                                        │
-│  • Leitura robusta do CSV (encoding, delimitadores)                     │
-│  • Normalização de nomes de colunas (snake_case)                        │
-│  • Conversão para formato Parquet                                       │
-│  • Sem transformações semânticas (dados brutos)                         │
-│                                                                         │
-│                                ▼                                        │
-│                  ┌──────────────────────────┐                           │
-│                  │ movies_metadata_bronze   │                           │
-│                  │      .parquet            │                           │
-│                  │   /dados/bronze/         │                           │
-│                  └────────────┬─────────────┘                           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                CAMADA SILVER - Limpeza e Enriquecimento                 │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  Transformações:                                                        │
-│  • Coerção de tipos numéricos (budget, revenue, popularity)             │
-│  • Parsing de datas (release_date → datetime)                           │
-│  • Extração de ano (release_year)                                       │
-│  • Parsing de campos JSON-like (genres, production_companies)           │
-│  • Criação de features derivadas:                                       │
-│    - ROI = revenue / budget                                             │
-│    - vote_density = vote_count / (anos desde lançamento + 1)            │
-│    - years_since_release                                                │
-│  • Remoção de duplicatas                                                │
-│  • Filtros de qualidade de dados                                        │
-│                                                                         │
-│                                ▼                                        │
-│                  ┌──────────────────────────┐                           │
-│                  │ movies_metadata_silver   │                           │
-│                  │      .parquet            │                           │
-│                  │   /dados/silver/         │                           │
-│                  └────────────┬─────────────┘                           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                  CAMADA GOLD - Datasets Finais                         │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  Transformações:                                                       │
-│  • Seleção de colunas core para análise                                │
-│  • Agregações e sumarizações                                           │
-│  • Datasets prontos para consumo analítico                             │
-│                                                                        │
-│                                ▼                                       │
-│         ┌──────────────────────────────────────┐                       │
-│         │   movies_metadata_gold.parquet       │                       │
-│         │   gold_describe.csv                  │                       │
-│         │   gold_sample.csv                    │                       │
-│         │        /dados/gold/                  │                       │
-│         └────────────┬─────────────────────────┘                       │
-└──────────────────────┼─────────────────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    DESTINO - Consumo de Dados                           │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐                 │
-│  │     EDA      │   │  Modelagem   │   │  Dashboards  │                 │
-│  │  (Gráficos)  │   │  (ML Model)  │   │   (BI Tool)  │                 │
-│  └──────────────┘   └──────────────┘   └──────────────┘                 │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+RAW (CSV) → BRONZE (Parquet) → SILVER (Parquet limpo) → GOLD (Parquet + CSV) → Consumo
 ```
-
-### Fluxo Detalhado por Etapa
-
-#### **Ingestão**
-- **Modo**: Batch (lotes)
-- **Formato**: CSV
-- **Volume**: ~45K registros (movies_metadata.csv)
-- **Frequência**: Uma vez (dataset estático do Kaggle)
-
-#### **Armazenamento**
-- **Bronze**: Parquet (dados brutos padronizados)
-- **Silver**: Parquet (dados limpos e enriquecidos)
-- **Gold**: Parquet + CSV (dados analíticos)
-
-#### **Transformação**
-- **Bronze → Silver**: Limpeza, tipagem, parsing de JSON, feature engineering
-- **Silver → Gold**: Seleção, agregação, preparação para consumo
 
 ---
 
@@ -125,7 +32,7 @@
 |------------|------------|---------------|
 | **Processamento** | Python + Pandas | Simplicidade, biblioteca madura para manipulação de dados tabulares |
 | **Armazenamento** | Parquet (Apache Arrow) | Formato colunar eficiente, compressão nativa, compatível com Big Data |
-| **Análise Exploratória** | Matplotlib | Visualizações simples e diretas |
+| **Análise Exploratória** | Matplotlib + Seaborn | Visualizações simples (Matplotlib) e heatmaps estatísticos avançados (Seaborn) |
 | **Modelagem** | Scikit-learn | Biblioteca padrão para ML em Python, ideal para baseline |
 | **Ambiente** | Jupyter Notebook / Google Colab | Prototipagem rápida, documentação viva |
 
@@ -251,9 +158,17 @@ S3 (Raw) → AWS Glue ETL → S3 (Bronze/Silver/Gold) → Athena (Query) → Qui
   - Exports para CSV (amostras e estatísticas)
 
 #### **✅ Análise**
-- [x] EDA básica (histogramas, scatter plots)
-- [x] Análise de gêneros
-- [x] Baseline de modelagem (Linear Regression)
+- [x] **Análise de Correlação**:
+  - Heatmap comparativo Bronze vs Silver (lado a lado)
+  - Identificação de correlações fortes (|r| > 0.5)
+  - Justificativa para seleção de features
+- [x] **EDA básica**:
+  - Histogramas de distribuição (vote_average)
+  - Scatter plots (orçamento vs receita)
+  - Top 10 gêneros por média de nota
+- [x] **Baseline de modelagem**:
+  - Regressão Linear para predição de vote_average
+  - Métricas: R² e MAE (Mean Absolute Error)
 
 ### 3.3 Componentes NÃO Implementados (Próximos Passos)
 
@@ -390,6 +305,7 @@ S3 (Raw) → AWS Glue ETL → S3 (Bronze/Silver/Gold) → Athena (Query) → Qui
 
 ---
 
-**Documento gerado em:** 2025-10-06
-**Versão:** 1.0
-**Status:** Em desenvolvimento
+**Documento gerado em:** 2025-10-12
+**Versão:** 1.1
+**Status:** Implementação concluída (AV1)
+**Última atualização:** 2025-10-12
