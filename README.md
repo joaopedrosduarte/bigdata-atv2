@@ -963,7 +963,7 @@ y_pred = model.predict(X_test)
 ## 📁 Estrutura do Projeto
 
 ```
-bigdata-atv1/
+bigdata-atv2/
 │
 ├── README.md                                    # Este arquivo
 ├── dados/
@@ -1012,7 +1012,7 @@ pip install pandas numpy pyarrow fastparquet scikit-learn matplotlib seaborn
 ```bash
 # Clone o repositório
 git clone <url-do-repositorio>
-cd bigdata-atv1
+cd bigdata-atv2
 
 # Baixe o dataset do Kaggle para dados/raw/
 # https://www.kaggle.com/datasets/rounakbanik/the-movies-dataset
@@ -1078,7 +1078,7 @@ jupyter notebook src/Projeto_BigData_Movies_Pipeline.ipynb
 
 ## 🎯 Status do Projeto
 
-### Checklist AV1
+### Checklist AV2
 
 - [x] **Ingestão**: Finalizado ✅
   - Leitura de CSV com múltiplas fontes (Kaggle, Drive, Upload)

@@ -189,5 +189,5 @@ Este diagrama ilustra o fluxo completo do pipeline de dados, desde a ingestão a
 ---
 
 **Documento gerado em:** 2025-10-12
-**Projeto:** Fundamentos de Big Data - AV1
+**Projeto:** Fundamentos de Big Data - AV2
 **Dataset:** The Movies Dataset (Kaggle)
