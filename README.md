@@ -107,7 +107,7 @@ Desenvolver um **pipeline completo de Big Data** para ingestão, processamento, 
 | Nome | Papel |
 |------|-------|
 | **João Pedro Duarte de Souza** | Engenheiro de Dados - Camada Gold, Análise e Documentação |
-| **Antony Kevin Delgado Silva** | Engenheiro de Dados - Camada Bronze e Ingestão |
+| **Anthony Kevin Delgado Silva** | Engenheiro de Dados - Camada Bronze e Ingestão |
 | **Beatriz Vilarim** | Engenheira de Dados - Camada Silver e Transformações |
 
 ---
